@@ -33,10 +33,16 @@ class ClipboardLogHandler(logging.Handler):
             self.last_timestamp = datetime.now()
             out.write(f"{self.last_timestamp.strftime('\n## %H:%M (start)')}\n\n")
 
+        self.last_entry = None
+
     def emit(self, record):
         log_entry = self.format(record)
         # Here you can implement the logic to save log_entry to a file or database
         # For example, you could write it to a file:
+
+        if log_entry == self.last_entry:
+            return
+        self.last_entry = log_entry
 
         with self.log_path.open("a") as out:
 
