@@ -19,32 +19,32 @@ class ClipboardLogHandler(logging.Handler):
         # Start a new log file at the beginning of Sunday
         last_sunday = date.today() - timedelta(days=datetime.today().weekday() + 1)
 
-        log_path = Path(f"clipboard_log_{last_sunday.strftime('%Y-%m-%d')}.md")
+        self.log_path = Path(f"clipboard_log_{last_sunday.strftime('%Y-%m-%d')}.md")
 
         day_header = f"# {date.today().strftime('%Y-%m-%d')}"
         has_header = False
-        if log_path.exists():
-            text = log_path.read_text()
+        if self.log_path.exists():
+            text = self.log_path.read_text()
             has_header = day_header in text
 
-        self.output = log_path.open("a")
-        if not has_header:
-            self.output.write(f"{day_header}\n\n")
-
-        self.last_timestamp = datetime.now()
-        self.output.write(f"{self.last_timestamp.strftime('\n## %H:%M (start)')}\n\n")
+        with self.log_path.open("a") as out:    
+            if not has_header:
+                out.write(f"{day_header}\n\n")
+            self.last_timestamp = datetime.now()
+            out.write(f"{self.last_timestamp.strftime('\n## %H:%M (start)')}\n\n")
 
     def emit(self, record):
         log_entry = self.format(record)
         # Here you can implement the logic to save log_entry to a file or database
         # For example, you could write it to a file:
 
-        if self.last_timestamp + timedelta(minutes=15) < datetime.now():
-            self.last_timestamp = datetime.now()
-            self.output.write(f"\n{self.last_timestamp.strftime('\n## %H:%M')}\n\n")
+        with self.log_path.open("a") as out:
 
-        self.output.write(f"{log_entry}\n")
-        self.output.flush()
+            if self.last_timestamp + timedelta(minutes=15) < datetime.now():
+                self.last_timestamp = datetime.now()
+                out.write(f"\n{self.last_timestamp.strftime('\n## %H:%M')}\n\n")
+
+            out.write(f"{log_entry}\n")
 
 
 def filter_password(text: str) -> str:
