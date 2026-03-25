@@ -7,7 +7,9 @@ authors = [
     { name = "Terry Brown", email = "brown.terryn@epa.gov" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pyperclip>=1.11.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.10.7,<0.11.0"]

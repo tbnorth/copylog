@@ -1,7 +1,10 @@
 """Get updates on clipboard changes and log them."""
 
 import logging
+import os
 import re
+import sys
+import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -27,7 +30,7 @@ class ClipboardLogHandler(logging.Handler):
             text = self.log_path.read_text()
             has_header = day_header in text
 
-        with self.log_path.open("a") as out:    
+        with self.log_path.open("a") as out:
             if not has_header:
                 out.write(f"{day_header}\n\n")
             self.last_timestamp = datetime.now()
@@ -45,7 +48,6 @@ class ClipboardLogHandler(logging.Handler):
         self.last_entry = log_entry
 
         with self.log_path.open("a") as out:
-
             if self.last_timestamp + timedelta(minutes=15) < datetime.now():
                 self.last_timestamp = datetime.now()
                 out.write(f"\n{self.last_timestamp.strftime('\n## %H:%M')}\n\n")
@@ -90,6 +92,17 @@ logging.basicConfig(
 )
 
 if __name__ == "__main__":
+    import pyperclip
+
+    if len(sys.argv) > 1:
+        os.chdir(sys.argv[1])
+    last_clipboard = None
+    while True:
+        current_clipboard = pyperclip.paste()
+        if current_clipboard != last_clipboard:
+            log_clipboard_change(current_clipboard)
+            last_clipboard = current_clipboard
+        time.sleep(0.5)  # Check clipboard every 0.5 seconds
     # Example usage
-    log_clipboard_change("This is a test clipboard change.")
-    log_clipboard_change("Passw0rd!")
+    # log_clipboard_change("This is a test clipboard change.")
+    # log_clipboard_change("Passw0rd!")
